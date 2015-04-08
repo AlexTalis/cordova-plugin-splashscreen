@@ -22,6 +22,7 @@ package org.apache.cordova.splashscreen;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Handler;
@@ -46,12 +47,12 @@ public class SplashScreen extends CordovaPlugin {
     private static Dialog splashDialog;
     private static ProgressDialog spinnerDialog;
     private static boolean firstShow = true;
-    
+
     /**
      * Displays the splash drawable.
      */
     private ImageView splashImageView;
-    
+
     /**
      * Remember last device orientation to detect orientation changes.
      */
@@ -72,10 +73,10 @@ public class SplashScreen extends CordovaPlugin {
             return;
         }
         // Make WebView invisible while loading URL
-        // getView().setVisibility(View.INVISIBLE);
+        getView().setVisibility(View.INVISIBLE);
         int drawableId = preferences.getInteger("SplashDrawableId", 0);
         if (drawableId == 0) {
-            String splashResource = preferences.getString("SplashScreen", "splash");
+            String splashResource = preferences.getString("SplashScreen", "screen");
             if (splashResource != null) {
                 drawableId = cordova.getActivity().getResources().getIdentifier(splashResource, "drawable", cordova.getActivity().getClass().getPackage().getName());
                 if (drawableId == 0) {
@@ -84,7 +85,7 @@ public class SplashScreen extends CordovaPlugin {
                 preferences.set("SplashDrawableId", drawableId);
             }
         }
-        
+
         // Save initial orientation.
         orientation = cordova.getActivity().getResources().getConfiguration().orientation;
 
@@ -92,7 +93,7 @@ public class SplashScreen extends CordovaPlugin {
         loadSpinner();
         showSplashScreen(true);
     }
-    
+
     /**
      * Shorter way to check value of "SplashMaintainAspectRatio" preference.
      */
@@ -172,14 +173,12 @@ public class SplashScreen extends CordovaPlugin {
         }
         return null;
     }
-    
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
 
+    // Don't add @Override so that plugin still compiles on 3.x.x for a while
+    public void onConfigurationChanged(Configuration newConfig) {
         if (newConfig.orientation != orientation) {
             orientation = newConfig.orientation;
-            
+
             // Splash drawable may change with orientation, so reload it.
             if (splashImageView != null) {
                 int drawableId = preferences.getInteger("SplashDrawableId", 0);
@@ -190,7 +189,7 @@ public class SplashScreen extends CordovaPlugin {
         }
     }
 
-	private void removeSplashScreen() {
+    private void removeSplashScreen() {
         cordova.getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 if (splashDialog != null && splashDialog.isShowing()) {
@@ -223,13 +222,13 @@ public class SplashScreen extends CordovaPlugin {
                 // Get reference to display
                 Display display = cordova.getActivity().getWindowManager().getDefaultDisplay();
                 Context context = webView.getContext();
-                
+
                 // Use an ImageView to render the image because of its flexible scaling options.
                 splashImageView = new ImageView(context);
                 splashImageView.setImageResource(drawableId);
                 LayoutParams layoutParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
                 splashImageView.setLayoutParams(layoutParams);
-                
+
                 splashImageView.setMinimumHeight(display.getHeight());
                 splashImageView.setMinimumWidth(display.getWidth());
 
@@ -305,12 +304,12 @@ public class SplashScreen extends CordovaPlugin {
         cordova.getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 spinnerStop();
-                /*spinnerDialog = ProgressDialog.show(webView.getContext(), title, message, true, true,
+                spinnerDialog = ProgressDialog.show(webView.getContext(), title, message, true, true,
                         new DialogInterface.OnCancelListener() {
                             public void onCancel(DialogInterface dialog) {
                                 spinnerDialog = null;
                             }
-                        });*/
+                        });
             }
         });
     }
